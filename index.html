@@ -1,0 +1,1072 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote Patient Monitoring for Decentralised Trials · Proposal</title>
+<meta name="description" content="A remote patient monitoring platform for decentralised clinical trials: protocol-timed assessments, real-time adverse-event capture with photos, an investigator review queue. With clear app flows and user journeys. UK GDPR by design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sora:wght@500;600;700&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  /* set theme + palette + font before paint to avoid flash */
+  (function(){try{
+    var t=localStorage.getItem('rpm-theme');
+    if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    document.documentElement.setAttribute('data-palette',localStorage.getItem('rpm-palette')||'teal');
+    document.documentElement.setAttribute('data-font',localStorage.getItem('rpm-font')||'tech');
+  }catch(e){
+    document.documentElement.setAttribute('data-palette','teal');
+    document.documentElement.setAttribute('data-font','tech');
+  }})();
+</script>
+<style>
+  /* ====================== TOKENS ====================== */
+  html[data-theme="dark"]{
+    --bg:#0E1117; --bg-elev:#141A26; --surface:#171E2C; --surface-2:#1F2738;
+    --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.17);
+    --ink:#EDEFF6; --ink-soft:#C2C8D6; --muted:#8B93A7;
+    --brand:#8C8DF8; --brand-2:#7172EC; --brand-soft:rgba(140,141,248,.14);
+    --flag:#FF7E66; --flag-soft:rgba(255,126,102,.14);
+    --shadow:0 18px 48px rgba(0,0,0,.45); --shadow-sm:0 8px 24px rgba(0,0,0,.35);
+    --glow:rgba(140,141,248,.30);
+    --grid:rgba(255,255,255,.05);
+  }
+  html[data-theme="light"]{
+    --bg:#F5F6FB; --bg-elev:#FFFFFF; --surface:#FFFFFF; --surface-2:#F0F2F9;
+    --line:rgba(20,26,44,.10); --line-2:rgba(20,26,44,.18);
+    --ink:#161B2C; --ink-soft:#3D465C; --muted:#697287;
+    --brand:#5A5CE0; --brand-2:#4F51D6; --brand-soft:rgba(90,92,224,.10);
+    --flag:#EF553C; --flag-soft:rgba(239,85,60,.10);
+    --shadow:0 18px 44px rgba(28,36,68,.12); --shadow-sm:0 8px 22px rgba(28,36,68,.08);
+    --glow:rgba(90,92,224,.20);
+    --grid:rgba(20,26,44,.045);
+  }
+  /* ---- palette variants (override accents per theme) ---- */
+  html[data-theme="dark"][data-palette="teal"]{--brand:#2DD4BF;--brand-2:#14B8A6;--brand-soft:rgba(45,212,191,.14);--flag:#FBBF24;--flag-soft:rgba(251,191,36,.14);--glow:rgba(45,212,191,.30)}
+  html[data-theme="light"][data-palette="teal"]{--brand:#0D9488;--brand-2:#0B7E74;--brand-soft:rgba(13,148,136,.10);--flag:#D97706;--flag-soft:rgba(217,119,6,.10);--glow:rgba(13,148,136,.20)}
+  html[data-theme="dark"][data-palette="violet"]{--brand:#A78BFA;--brand-2:#8B5CF6;--brand-soft:rgba(167,139,250,.15);--flag:#FB7185;--flag-soft:rgba(251,113,133,.14);--glow:rgba(167,139,250,.30)}
+  html[data-theme="light"][data-palette="violet"]{--brand:#7C3AED;--brand-2:#6D28D9;--brand-soft:rgba(124,58,237,.10);--flag:#E11D6B;--flag-soft:rgba(225,29,107,.10);--glow:rgba(124,58,237,.20)}
+
+  /* ---- font pairings ---- */
+  html[data-font="editorial"]{--disp:"Newsreader",Georgia,serif}
+  html[data-font="editorial"] h1,html[data-font="editorial"] h2,html[data-font="editorial"] h3,html[data-font="editorial"] .lede{letter-spacing:-.005em}
+  html[data-font="soft"]{--disp:"Sora",var(--body)}
+
+  :root{
+    --maxw:1140px; --d:cubic-bezier(.22,.7,.18,1);
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --body:"Inter",system-ui,sans-serif;
+    --disp:"Space Grotesk",var(--body);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+    transition:background-color .4s ease,color .4s ease}
+  ::selection{background:var(--brand);color:#fff}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:var(--disp);font-weight:600;line-height:1.08;letter-spacing:-.018em;margin:0}
+  p{margin:0}
+  /* smooth crossfade only during theme switch */
+  html.switching *{transition:background-color .4s ease,border-color .4s ease,color .4s ease,fill .4s ease,box-shadow .4s ease,stroke .4s ease !important}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  .section{padding:108px 0;position:relative}
+  .band{background:var(--bg-elev);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+  .eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--brand);display:flex;gap:13px;align-items:center;margin-bottom:24px}
+  .eyebrow .idx{color:var(--muted)}
+  .eyebrow::before{content:"";width:30px;height:1px;background:var(--brand);opacity:.6}
+  .lede{font-size:clamp(27px,3.5vw,42px);font-family:var(--disp);font-weight:600;
+    letter-spacing:-.022em;max-width:19ch;margin-bottom:20px}
+  .sub{color:var(--ink-soft);max-width:60ch;font-size:18px}
+
+  /* ====================== NAV ====================== */
+  .nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 78%,transparent);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:18px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:13.5px;letter-spacing:.03em;white-space:nowrap}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);
+    box-shadow:0 0 0 0 var(--glow);animation:pulse 2.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--glow)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .navlinks{display:flex;gap:26px;font-family:var(--mono);font-size:12px;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--muted);margin-left:auto}
+  .navlinks a{transition:color .2s;position:relative;padding:4px 0}
+  .navlinks a:hover,.navlinks a.active{color:var(--ink)}
+  .navlinks a.active::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--brand);border-radius:2px}
+  .navtools{display:flex;align-items:center;gap:10px}
+  .tgl{width:62px;height:32px;border-radius:100px;border:1px solid var(--line-2);background:var(--surface);
+    position:relative;cursor:pointer;padding:0;flex:none;transition:background .3s}
+  .tgl .knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+    background:var(--brand);display:grid;place-items:center;color:#fff;font-size:13px;
+    transition:transform .35s var(--d),background .3s}
+  html[data-theme="light"] .tgl .knob{transform:translateX(30px)}
+  .tgl .knob .moon{display:none}.tgl .knob .sun{display:block}
+  html[data-theme="light"] .tgl .knob .sun{display:none}
+  html[data-theme="light"] .tgl .knob .moon{display:block}
+  .burger{display:none;background:var(--surface);border:1px solid var(--line-2);color:var(--ink);
+    width:40px;height:34px;border-radius:9px;cursor:pointer;font-size:15px}
+  .mobnav{display:none;position:fixed;inset:64px 0 auto;z-index:75;background:var(--bg-elev);
+    border-bottom:1px solid var(--line);flex-direction:column;padding:12px 28px;
+    font-family:var(--mono);font-size:14px;letter-spacing:.04em;transform:translateY(-120%);transition:transform .32s var(--d)}
+  .mobnav.open{transform:none}
+  .mobnav a{padding:12px 0;border-bottom:1px solid var(--line);color:var(--ink-soft)}
+
+  /* ---- design picker ---- */
+  .gear{width:auto;padding:0 13px;height:32px;border-radius:100px;border:1px solid var(--line-2);
+    background:var(--surface);color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:12px;
+    letter-spacing:.04em;display:flex;align-items:center;gap:7px;transition:border-color .2s}
+  .gear:hover{border-color:var(--brand)}
+  .gear .ico{font-size:13px}
+  .pickwrap{position:relative}
+  .picker{position:absolute;top:44px;right:0;z-index:90;width:248px;background:var(--bg-elev);
+    border:1px solid var(--line-2);border-radius:15px;box-shadow:var(--shadow);padding:16px;
+    display:none;flex-direction:column;gap:15px}
+  .picker.open{display:flex;animation:fade .25s var(--d)}
+  .pk-row{display:flex;flex-direction:column;gap:9px}
+  .pk-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .sws{display:flex;gap:9px}
+  .sw{width:38px;height:38px;border-radius:10px;cursor:pointer;border:2px solid var(--line);
+    background:linear-gradient(135deg,var(--a) 0 55%,var(--b) 55% 100%);transition:transform .18s,border-color .18s}
+  .sw:hover{transform:translateY(-2px)}
+  .sw.on{border-color:var(--ink)}
+  .fbs{display:flex;gap:7px}
+  .fb{flex:1;padding:9px 6px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);
+    color:var(--ink-soft);cursor:pointer;font-size:13px;transition:.18s}
+  .fb:hover{border-color:var(--brand)}
+  .fb.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .fb.f-tech{font-family:"Space Grotesk",sans-serif}
+  .fb.f-editorial{font-family:"Newsreader",serif}
+  .fb.f-soft{font-family:"Sora",sans-serif}
+
+  /* ====================== HERO ====================== */
+  .hero{position:relative;padding:92px 0 64px;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(820px 420px at 80% 4%,var(--brand-soft),transparent 62%),
+               radial-gradient(620px 340px at 4% 90%,var(--flag-soft),transparent 60%)}
+  .hgrid{position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:62px 62px;mask-image:linear-gradient(180deg,#000,transparent 76%);-webkit-mask-image:linear-gradient(180deg,#000,transparent 76%)}
+  .hero .wrap{position:relative}
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:28px;display:flex;gap:11px;flex-wrap:wrap;align-items:center}
+  .kicker b{color:var(--brand);font-weight:500}
+  .h1{font-size:clamp(38px,6.2vw,74px);font-weight:700;letter-spacing:-.03em;max-width:16ch;margin-bottom:24px}
+  .h1 .w{display:inline-block;opacity:0;transform:translateY(20px);animation:rise .7s var(--d) forwards}
+  .h1 .em{color:var(--brand);white-space:nowrap}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .herosub{font-size:clamp(17px,2vw,21px);color:var(--ink-soft);max-width:60ch;opacity:0;animation:rise .7s var(--d) .5s forwards}
+
+  /* vital trace signature */
+  .trace{position:relative;margin:44px 0 8px;border:1px solid var(--line);border-radius:16px;
+    background:var(--surface);padding:15px 16px 12px;overflow:hidden;box-shadow:var(--shadow-sm)}
+  .trace .label{position:absolute;font-family:var(--mono);font-size:11px;letter-spacing:.04em;z-index:2}
+  .trace .l-n{top:15px;left:18px;color:var(--brand)}
+  .trace .l-a{top:15px;right:18px;color:var(--flag);text-align:right}
+  .trace svg{display:block;width:100%;height:auto}
+  .tp{fill:none;stroke:var(--brand);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+  .tp.draw{stroke-dasharray:2600;stroke-dashoffset:2600;animation:draw 2.2s var(--d) .3s forwards}
+  .sp{fill:none;stroke:var(--flag);stroke-width:2.8;stroke-linejoin:round;stroke-linecap:round;
+    filter:drop-shadow(0 0 6px var(--flag))}
+  .sp.draw{stroke-dasharray:520;stroke-dashoffset:520;animation:draw 1s var(--d) 1.6s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .blip{fill:var(--flag)}
+  .blip.pop{transform-box:fill-box;transform-origin:center;animation:pop 2.4s ease 2.2s infinite}
+  @keyframes pop{0%,100%{opacity:.5;r:4}50%{opacity:1;r:6.5}}
+  .ae-call{display:inline-flex;gap:9px;align-items:center;margin-top:6px;font-family:var(--mono);font-size:12px;
+    color:var(--flag);border:1px solid var(--flag);background:var(--flag-soft);padding:6px 12px;border-radius:100px}
+  .ae-call .ph{width:13px;height:13px;border:1.5px solid var(--flag);border-radius:3px}
+
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);margin-top:40px;border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .stat{padding:22px 20px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:none}
+  .stat .n{font-family:var(--disp);font-size:30px;font-weight:600;letter-spacing:-.02em}
+  .stat .n.b{color:var(--brand)} .stat .n.a{color:var(--flag)}
+  .stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);margin-top:7px;text-transform:uppercase}
+  .meta{display:flex;gap:10px 26px;flex-wrap:wrap;margin-top:32px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .meta b{color:var(--ink-soft);font-weight:500}
+
+  /* ====================== CARDS ====================== */
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px 24px;
+    transition:border-color .25s,transform .3s var(--d),box-shadow .3s}
+  .card:hover{border-color:var(--line-2);transform:translateY(-4px);box-shadow:var(--shadow)}
+  .card .ci{font-family:var(--mono);font-size:12px;color:var(--brand);letter-spacing:.06em;margin-bottom:14px}
+  .card h3{font-size:20px;margin-bottom:9px}
+  .card p{color:var(--ink-soft);font-size:15.5px}
+  .card .val{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:13px}
+
+  /* ====================== TWO APPS (functionality) ====================== */
+  .apps{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:14px}
+  .apppanel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px 26px;
+    box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:20px}
+  .apphead{display:flex;align-items:center;gap:13px}
+  .appicon{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:19px;
+    background:var(--brand-soft);color:var(--brand);border:1px solid var(--line)}
+  .apphead h3{font-size:21px}
+  .apphead .who{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+  .feats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+  .feats li{display:flex;gap:11px;font-size:15px;color:var(--ink-soft);align-items:flex-start}
+  .feats li::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--brand);margin-top:7px;flex:none;rotate:45deg}
+
+  /* device mockups */
+  .phone{align-self:center;width:230px;height:430px;border-radius:30px;border:1px solid var(--line-2);
+    background:var(--bg-elev);box-shadow:var(--shadow);padding:14px 12px;position:relative;overflow:hidden}
+  .phone::before{content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);width:64px;height:5px;border-radius:6px;background:var(--line-2)}
+  .scr{margin-top:22px;height:calc(100% - 28px);border-radius:18px;background:var(--surface);border:1px solid var(--line);
+    padding:14px 13px;display:flex;flex-direction:column;gap:11px}
+  .scr .st{font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;justify-content:space-between}
+  .scr .title{font-family:var(--disp);font-weight:600;font-size:15px}
+  .photoTile{height:96px;border-radius:12px;border:1.5px dashed var(--line-2);display:grid;place-items:center;
+    color:var(--brand);background:var(--brand-soft);gap:4px;font-size:11px;font-family:var(--mono)}
+  .photoTile .cam{font-size:22px}
+  .field{border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:11.5px;color:var(--ink-soft);background:var(--bg-elev)}
+  .field.small{color:var(--muted);font-size:10.5px}
+  .pbtn{margin-top:auto;background:var(--brand);color:#fff;text-align:center;border-radius:10px;padding:11px;
+    font-size:12.5px;font-weight:600;font-family:var(--disp)}
+
+  .browser{align-self:center;width:100%;max-width:430px;border-radius:14px;border:1px solid var(--line-2);
+    background:var(--bg-elev);box-shadow:var(--shadow);overflow:hidden}
+  .bbar{display:flex;gap:6px;padding:11px 13px;border-bottom:1px solid var(--line);align-items:center}
+  .bbar i{width:9px;height:9px;border-radius:50%;background:var(--line-2);display:block}
+  .bbar .url{margin-left:8px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .bbody{padding:15px 15px 17px}
+  .qhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+  .qhead .t{font-family:var(--disp);font-weight:600;font-size:14px}
+  .qhead .c{font-family:var(--mono);font-size:10.5px;color:var(--flag)}
+  .qrow{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:10px;
+    border:1px solid var(--line);margin-bottom:8px;background:var(--surface)}
+  .qrow.hot{border-color:var(--flag);background:var(--flag-soft)}
+  .qrow .pid{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .qrow .desc{font-size:12px;color:var(--ink)}
+  .qrow .desc small{display:block;color:var(--muted);font-size:10px;font-family:var(--mono)}
+  .qrow .chip{font-family:var(--mono);font-size:9.5px;padding:4px 8px;border-radius:100px;border:1px solid var(--line-2);color:var(--muted)}
+  .qrow.hot .chip{color:var(--flag);border-color:var(--flag)}
+
+  /* ====================== FLOWS (interactive) ====================== */
+  .ftabs{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 30px}
+  .ftab{font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;padding:11px 17px;border-radius:100px;
+    border:1px solid var(--line-2);background:var(--surface);color:var(--ink-soft);cursor:pointer;transition:.22s}
+  .ftab:hover{border-color:var(--brand)}
+  .ftab.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .flowpanel{display:none}
+  .flowpanel.show{display:block;animation:fade .5s var(--d)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .track{position:relative;display:grid;gap:16px;grid-template-columns:repeat(5,1fr)}
+  .track.cols4{grid-template-columns:repeat(4,1fr)}
+  .track::before{content:"";position:absolute;top:30px;left:6%;right:6%;height:2px;background:var(--line-2);z-index:0}
+  .track .fill{position:absolute;top:30px;left:6%;height:2px;background:linear-gradient(90deg,var(--brand),var(--flag));
+    width:0;z-index:1;transition:width 1.6s var(--d)}
+  .flowpanel.show .track .fill{width:88%}
+  .fnode{position:relative;z-index:2;text-align:center;opacity:0;transform:translateY(12px)}
+  .flowpanel.show .fnode{animation:rise .55s var(--d) forwards}
+  .flowpanel.show .fnode:nth-child(2){animation-delay:.15s}
+  .flowpanel.show .fnode:nth-child(3){animation-delay:.45s}
+  .flowpanel.show .fnode:nth-child(4){animation-delay:.75s}
+  .flowpanel.show .fnode:nth-child(5){animation-delay:1.05s}
+  .flowpanel.show .fnode:nth-child(6){animation-delay:1.35s}
+  .fdot{width:60px;height:60px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;
+    font-size:23px;background:var(--surface);border:1px solid var(--line-2);box-shadow:var(--shadow-sm)}
+  .fnode.flagnode .fdot{border-color:var(--flag);color:var(--flag);background:var(--flag-soft)}
+  .fnode h4{font-family:var(--disp);font-size:15px;margin:0 0 6px;font-weight:600}
+  .fnode p{font-size:13px;color:var(--ink-soft);max-width:22ch;margin:0 auto}
+  .fnode .surf{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:9px}
+  .fnode.flagnode .surf{color:var(--flag)}
+
+  /* ====================== JOURNEYS (tabbed personas) ====================== */
+  .jtabs{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
+  .jtab{display:flex;gap:11px;align-items:center;font-family:var(--mono);font-size:13px;padding:13px 18px;border-radius:13px;
+    border:1px solid var(--line-2);background:var(--surface);color:var(--ink-soft);cursor:pointer;transition:.22s}
+  .jtab .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:var(--brand-soft);color:var(--brand);font-family:var(--disp);font-weight:600}
+  .jtab:hover{border-color:var(--brand)}
+  .jtab.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .jtab.active .av{background:rgba(255,255,255,.22);color:#fff}
+  .jpanel{display:none;margin-top:26px}
+  .jpanel.show{display:block;animation:fade .5s var(--d)}
+  .lane{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
+  .stage{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:22px 20px;position:relative}
+  .stage .num{position:absolute;top:-13px;left:20px;width:26px;height:26px;border-radius:50%;background:var(--brand);
+    color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:12px}
+  .stage h4{font-family:var(--disp);font-size:16px;margin:6px 0 12px;font-weight:600}
+  .stage .does,.stage .app{font-size:13.5px;line-height:1.5}
+  .stage .does{color:var(--ink);margin-bottom:10px}
+  .stage .app{color:var(--ink-soft);padding-top:10px;border-top:1px solid var(--line)}
+  .stage .app b{font-family:var(--mono);font-size:10px;color:var(--brand);display:block;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:500}
+
+  /* ====================== ARCHITECTURE ====================== */
+  .layers{display:flex;flex-direction:column;gap:13px;margin-top:8px}
+  .layer{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px 22px;
+    display:grid;grid-template-columns:140px 1fr;gap:22px;align-items:center;transition:border-color .25s}
+  .layer:hover{border-color:var(--line-2)}
+  .layer .lt{font-family:var(--mono);font-size:12px;color:var(--brand);letter-spacing:.05em}
+  .layer .lt small{display:block;color:var(--muted);margin-top:5px;letter-spacing:0}
+  .layer.future .lt{color:var(--flag)} .layer.future{border-style:dashed}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);border:1px solid var(--line-2);
+    background:var(--bg-elev);padding:7px 12px;border-radius:9px}
+  .arow{text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .offline{margin-top:18px;border:1px dashed var(--brand);border-radius:14px;padding:20px 22px;background:var(--brand-soft)}
+  .offline .ci{font-family:var(--mono);font-size:12px;color:var(--brand);letter-spacing:.07em;margin-bottom:9px}
+  .offline p{color:var(--ink-soft);font-size:15px}
+
+  /* ====================== STACK ====================== */
+  .stack{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .scell{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px 18px;transition:transform .3s var(--d),box-shadow .3s}
+  .scell:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+  .scell .ly{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .scell .tech{font-family:var(--disp);font-size:20px;font-weight:600}
+  .scell.cloud .tech{color:var(--brand)}
+  .scell .rz{margin-top:9px;font-size:14px;color:var(--ink-soft)}
+
+  /* ====================== COMPLIANCE ====================== */
+  .reglist{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .reg{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px}
+  .reg h3{font-size:17px;margin-bottom:8px} .reg p{color:var(--ink-soft);font-size:15px}
+  .reg .st{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;margin-top:13px;color:var(--brand)}
+  .reg.rule{border-color:var(--flag);background:var(--flag-soft)} .reg.rule .st{color:var(--flag)}
+
+  /* ====================== TIMELINE ====================== */
+  .tl{display:flex;flex-direction:column;gap:13px;margin-top:8px}
+  .ph{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px 24px;
+    display:grid;grid-template-columns:200px 1fr 190px;gap:24px;align-items:start;transition:border-color .25s}
+  .ph:hover{border-color:var(--line-2)}
+  .ph .pn{font-family:var(--mono);font-size:12px;color:var(--brand);letter-spacing:.05em}
+  .ph .pn b{display:block;font-family:var(--disp);font-size:18px;color:var(--ink);font-weight:600;margin-top:7px}
+  .ph .pw{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:5px}
+  .ph .pd{color:var(--ink-soft);font-size:15px}
+  .ph .px{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+  .ph.future{border-style:dashed} .ph.future .pn{color:var(--flag)}
+  .tlnote{margin-top:18px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .tlnote b{color:var(--brand);font-weight:500}
+
+  /* ====================== QUESTIONS ====================== */
+  .qlist{counter-reset:q;display:grid;grid-template-columns:1fr 1fr;gap:8px 30px}
+  .q{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:15px 0;border-top:1px solid var(--line);align-items:start;color:var(--ink-soft);font-size:15.5px}
+  .q::before{counter-increment:q;content:counter(q,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--brand);padding-top:3px}
+
+  /* ====================== ASK ====================== */
+  .ask{text-align:center;max-width:760px;margin:0 auto}
+  .ask h2{font-size:clamp(30px,4.4vw,50px);font-weight:700;letter-spacing:-.025em;margin-bottom:20px}
+  .ask p{color:var(--ink-soft);font-size:18px}
+  .ctas{display:flex;gap:14px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+  .btn{font-family:var(--mono);font-size:13px;letter-spacing:.03em;padding:14px 26px;border-radius:100px;border:1px solid var(--line-2);transition:.22s;cursor:pointer;background:var(--surface);color:var(--ink)}
+  .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:500}
+  .btn.primary:hover{background:var(--brand-2);box-shadow:0 0 34px var(--glow);transform:translateY(-2px)}
+  .btn.ghost:hover{border-color:var(--ink);transform:translateY(-2px)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;background:var(--bg-elev)}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s var(--d),transform .7s var(--d)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ====================== ELEVATED UI ====================== */
+  /* scroll progress + grain */
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:100;
+    background:linear-gradient(90deg,var(--brand),var(--flag));box-shadow:0 0 12px var(--glow)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  /* timepoint spine nav */
+  .spine{position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:17px}
+  .spine::before{content:"";position:absolute;left:4px;top:-4px;bottom:-4px;width:1px;background:var(--line-2)}
+  .spine a{display:flex;align-items:center;gap:11px;position:relative}
+  .sdot{width:9px;height:9px;border-radius:50%;background:var(--line-2);transition:.25s var(--d);flex:none}
+  .spine a:hover .sdot,.spine a.active .sdot{background:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  .slab{font-family:var(--mono);font-size:11px;color:var(--muted);opacity:0;transform:translateX(-5px);
+    transition:.25s var(--d);white-space:nowrap;pointer-events:none}
+  .spine a:hover .slab,.spine a.active .slab{opacity:1;transform:none;color:var(--ink)}
+  @media(max-width:1320px){.spine{display:none}}
+
+  /* card top-accent on hover */
+  .card{position:relative;overflow:hidden}
+  .card::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--brand),var(--flag));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--d)}
+  .card:hover::after{transform:scaleX(1)}
+
+  /* focus visibility */
+  a:focus-visible,button:focus-visible,.sw:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:5px}
+
+  /* ====================== LIVE MONITOR HERO ====================== */
+  .monitor{margin:44px 0 8px;border:1px solid var(--line);border-radius:18px;background:var(--surface);
+    box-shadow:var(--shadow);overflow:hidden}
+  .mon-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;
+    border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  .mon-top .live{display:flex;align-items:center;gap:8px;color:var(--brand)}
+  .mon-top .live i{width:8px;height:8px;border-radius:50%;background:var(--brand);animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  .mon-body{display:grid;grid-template-columns:210px 1fr}
+  .vitals{display:flex;flex-direction:column;border-right:1px solid var(--line)}
+  .vital{padding:15px 20px;border-bottom:1px solid var(--line)}
+  .vital:last-child{border-bottom:none}
+  .vlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .vval{font-family:var(--disp);font-size:33px;font-weight:600;line-height:1.1;margin-top:3px;color:var(--brand);font-variant-numeric:tabular-nums}
+  .vval small{font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
+  .vnum{display:inline-block;min-width:1.4ch}
+  .scope{position:relative;background:#080D16;overflow:hidden}
+  .scope svg{position:absolute;inset:0;width:100%;height:100%}
+  .scope .g{animation:scroll 7s linear infinite}
+  @keyframes scroll{to{transform:translateX(-1200px)}}
+  .ecgline{fill:none;stroke:#2DD4BF;stroke-width:2.2;filter:drop-shadow(0 0 5px rgba(45,212,191,.55))}
+  .scope .baseline{stroke:rgba(45,212,191,.12);stroke-width:1}
+  .sweep{position:absolute;top:0;bottom:0;width:130px;left:-130px;
+    background:linear-gradient(90deg,transparent,rgba(45,212,191,.14),transparent);animation:sw 4.5s linear infinite}
+  @keyframes sw{to{left:100%}}
+  .event{position:absolute;right:18px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:11px;flex-direction:row-reverse}
+  .evdot{width:13px;height:13px;border-radius:50%;background:#FBBF24;animation:evp 1.8s infinite;flex:none}
+  @keyframes evp{0%{box-shadow:0 0 0 0 rgba(251,191,36,.5)}70%{box-shadow:0 0 0 13px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .evlabel{font-family:var(--mono);font-size:11px;color:#FBBF24;line-height:1.5;text-align:right}
+  @media(max-width:620px){
+    .mon-body{grid-template-columns:1fr}
+    .vitals{flex-direction:row;border-right:none;border-bottom:1px solid var(--line)}
+    .vital{flex:1;border-bottom:none;border-right:1px solid var(--line)}
+    .vital:last-child{border-right:none}
+    .vval{font-size:24px}.scope{min-height:150px}.evlabel{display:none}
+  }
+
+  /* ====================== ARCH DIAGRAM ====================== */
+  .archflow{margin-top:8px}
+  .tier{display:grid;gap:14px}
+  .tier.two{grid-template-columns:1fr 1fr}
+  .node{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px 20px;
+    display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow-sm);position:relative;transition:border-color .25s,transform .3s var(--d)}
+  .node:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .nic{width:42px;height:42px;border-radius:11px;background:var(--brand-soft);color:var(--brand);
+    display:grid;place-items:center;font-size:19px;border:1px solid var(--line);flex:none}
+  .node h4{font-family:var(--disp);font-size:17px;margin:0}
+  .nsub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+  .nchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .nchip{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);border:1px solid var(--line-2);
+    background:var(--bg-elev);padding:5px 10px;border-radius:7px}
+  .node.future{border-style:dashed}.node.future .nic{background:var(--flag-soft);color:var(--flag)}
+  .conn{height:48px;position:relative;display:flex;justify-content:center}
+  .conn .line{width:2px;height:100%;background:var(--line-2);position:relative;overflow:hidden}
+  .conn .line::after{content:"";position:absolute;left:-1px;width:4px;height:15px;border-radius:4px;
+    background:var(--brand);box-shadow:0 0 9px var(--glow);top:-15px;animation:flow 2.2s linear infinite}
+  @keyframes flow{to{top:100%}}
+  .conn.dash .line{background:repeating-linear-gradient(var(--line-2) 0 5px,transparent 5px 11px)}
+  .conn.dash .line::after{display:none}
+  .conn .clab{position:absolute;left:calc(50% + 14px);top:50%;transform:translateY(-50%);
+    font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap}
+
+  /* ====================== COMPLIANCE POSTURE ====================== */
+  .designrule{border:1px solid var(--flag);background:var(--flag-soft);border-radius:16px;padding:24px 26px;margin-top:8px;margin-bottom:22px}
+  .designrule .dr-ey{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--flag);margin-bottom:12px}
+  .designrule h3{font-size:21px;margin-bottom:8px}
+  .designrule p{color:var(--ink-soft);font-size:15.5px;max-width:62ch}
+  .ruleflow{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:18px}
+  .rstep{border:1px solid var(--line-2);background:var(--bg-elev);border-radius:10px;padding:11px 15px;font-size:13.5px;color:var(--ink)}
+  .rstep b{font-family:var(--mono);font-size:10px;display:block;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;font-weight:500}
+  .rstep.no{border-color:var(--flag);color:var(--flag)}
+  .rstep.no span{text-decoration:line-through;opacity:.85}
+  .rarrow{color:var(--muted);font-size:16px}
+  .posture{display:flex;flex-direction:column;gap:12px}
+  .preg{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;padding:18px 22px;
+    border:1px solid var(--line);border-radius:13px;background:var(--surface);transition:border-color .25s}
+  .preg:hover{border-color:var(--line-2)}
+  .preg h4{font-size:16.5px;margin:0 0 5px} .preg p{color:var(--ink-soft);font-size:14.5px;margin:0}
+  .badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    padding:7px 13px;border-radius:100px;white-space:nowrap;border:1px solid}
+  .badge.ok{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+  .badge.rule{color:var(--flag);border-color:var(--flag);background:var(--flag-soft)}
+  .badge.na{color:var(--muted);border-color:var(--line-2);background:var(--bg-elev)}
+
+  /* ====================== DELIVERY ROADMAP ====================== */
+  .road{position:relative;margin-top:8px;padding-left:8px}
+  .road::before{content:"";position:absolute;left:17px;top:8px;bottom:14px;width:2px;background:var(--line-2)}
+  .road .roadfill{position:absolute;left:17px;top:8px;width:2px;height:0;
+    background:linear-gradient(180deg,var(--brand),var(--flag));box-shadow:0 0 10px var(--glow);transition:height .15s linear}
+  .rphase{position:relative;padding-left:52px;padding-bottom:20px}
+  .rphase:last-child{padding-bottom:0}
+  .rnode{position:absolute;left:9px;top:6px;width:18px;height:18px;border-radius:50%;background:var(--bg);
+    border:2px solid var(--brand);z-index:2}
+  .rphase.future .rnode{border-color:var(--flag);border-style:dashed}
+  .rcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px 22px;
+    box-shadow:var(--shadow-sm);transition:border-color .25s,transform .3s var(--d)}
+  .rcard:hover{border-color:var(--brand);transform:translateX(5px)}
+  .rphase.future .rcard{border-style:dashed}
+  .rhead{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+  .rhead .rt{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.05em}
+  .rhead .rt b{display:block;font-family:var(--disp);font-size:18px;color:var(--ink);font-weight:600;margin-top:5px;letter-spacing:-.01em}
+  .wkpill{font-family:var(--mono);font-size:11.5px;color:var(--brand);border:1px solid var(--brand);
+    border-radius:100px;padding:5px 13px;background:var(--brand-soft);white-space:nowrap}
+  .rphase.future .wkpill{color:var(--flag);border-color:var(--flag);background:var(--flag-soft)}
+  .rcard .rd{color:var(--ink-soft);font-size:15px}
+  .rcard .rx{margin-top:13px;display:inline-block;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    border-top:1px solid var(--line);padding-top:12px}
+  .rcard .rx b{color:var(--brand)}
+
+  @media(max-width:760px){.tier.two{grid-template-columns:1fr}.preg{grid-template-columns:1fr;gap:12px}}
+
+  /* ====================== RESPONSIVE ====================== */
+  @media(max-width:920px){
+    .navlinks{display:none}.burger{display:block}.mobnav{display:flex}
+    .g3,.g2,.apps,.stack,.reglist,.qlist{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat{border-bottom:1px solid var(--line)}.stat:nth-child(odd){border-right:1px solid var(--line)}
+    .track,.track.cols4{grid-template-columns:1fr;gap:26px}
+    .track::before,.track .fill{display:none}
+    .fnode{text-align:left;display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:center}
+    .fdot{margin:0}.fnode p{margin:0}.fnode h4{margin-bottom:3px}
+    .lane{grid-template-columns:1fr;gap:26px}
+    .layer{grid-template-columns:1fr;gap:14px}
+    .ph{grid-template-columns:1fr;gap:10px}.ph .px{text-align:left}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}.tp,.sp{stroke-dashoffset:0!important}
+    .h1 .w,.herosub{opacity:1;transform:none}.fnode{opacity:1;transform:none}
+    .flowpanel.show .track .fill{width:88%}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body id="top">
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>RPM&nbsp;/&nbsp;DCT</div>
+    <div class="navlinks">
+      <a href="#understanding">Brief</a>
+      <a href="#apps">The apps</a>
+      <a href="#flows">Flows</a>
+      <a href="#journeys">Journeys</a>
+      <a href="#architecture">Build</a>
+      <a href="#delivery">Delivery</a>
+    </div>
+    <div class="navtools">
+      <div class="pickwrap">
+        <button class="gear" id="gear" aria-label="Design settings" aria-expanded="false"><span class="ico">✦</span>Theme</button>
+        <div class="picker" id="picker">
+          <div class="pk-row">
+            <span class="pk-lbl">Colour palette</span>
+            <div class="sws">
+              <div class="sw" data-pal="indigo" title="Indigo" style="--a:#6366F1;--b:#FF7E66"></div>
+              <div class="sw on" data-pal="teal" title="Clinical teal" style="--a:#14B8A6;--b:#F59E0B"></div>
+              <div class="sw" data-pal="violet" title="Royal violet" style="--a:#8B5CF6;--b:#FB7185"></div>
+            </div>
+          </div>
+          <div class="pk-row">
+            <span class="pk-lbl">Typeface</span>
+            <div class="fbs">
+              <button class="fb f-tech on" data-font="tech">Grotesk</button>
+              <button class="fb f-editorial" data-font="editorial">Serif</button>
+              <button class="fb f-soft" data-font="soft">Sora</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="tgl" id="tgl" aria-label="Toggle light or dark mode" aria-pressed="false">
+        <span class="knob"><span class="sun">☀</span><span class="moon">☾</span></span>
+      </button>
+      <button class="burger" id="burger" aria-label="Menu">≡</button>
+    </div>
+  </div>
+</nav>
+<div class="mobnav" id="mobnav">
+  <a href="#understanding">The brief</a>
+  <a href="#apps">The apps</a>
+  <a href="#flows">App flows</a>
+  <a href="#journeys">User journeys</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#delivery">Delivery</a>
+  <a href="#ask">The ask</a>
+</div>
+
+<div class="progress" id="progress"></div>
+<nav class="spine" id="spine" aria-label="Section navigation">
+  <a href="#understanding"><span class="sdot"></span><span class="slab">01 · The brief</span></a>
+  <a href="#apps"><span class="sdot"></span><span class="slab">02 · The apps</span></a>
+  <a href="#flows"><span class="sdot"></span><span class="slab">03 · App flows</span></a>
+  <a href="#journeys"><span class="sdot"></span><span class="slab">04 · User journeys</span></a>
+  <a href="#architecture"><span class="sdot"></span><span class="slab">05 · Architecture</span></a>
+  <a href="#stack"><span class="sdot"></span><span class="slab">06 · The stack</span></a>
+  <a href="#compliance"><span class="sdot"></span><span class="slab">07 · Compliance</span></a>
+  <a href="#delivery"><span class="sdot"></span><span class="slab">08 · Delivery</span></a>
+  <a href="#questions"><span class="sdot"></span><span class="slab">09 · Open items</span></a>
+  <a href="#ask"><span class="sdot"></span><span class="slab">10 · The ask</span></a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hgrid"></div>
+  <div class="wrap">
+    <div class="kicker">Remote patient monitoring · <b>Decentralised clinical trials</b> · United Kingdom · 2026</div>
+    <h1 class="h1">
+      <span class="w" style="animation-delay:.05s">Keep&nbsp;</span><span class="w" style="animation-delay:.12s">watch&nbsp;</span><span class="w" style="animation-delay:.19s">on&nbsp;</span><span class="w" style="animation-delay:.26s">every&nbsp;</span><span class="w" style="animation-delay:.33s">patient&nbsp;</span><span class="w" style="animation-delay:.4s">—&nbsp;</span><span class="w em" style="animation-delay:.47s">three&nbsp;hours</span><span class="w" style="animation-delay:.54s">&nbsp;from&nbsp;the&nbsp;centre.</span>
+    </h1>
+    <p class="herosub">A remote monitoring platform for your decentralised trial: protocol-timed assessments, adverse-event capture with photographs, and a live review queue for your investigators — built to UK&nbsp;GDPR from the first commit.</p>
+
+    <div class="monitor" aria-hidden="true">
+      <div class="mon-top">
+        <span class="live"><i></i>LIVE · remote patient monitor</span>
+        <span>patient P-0142 · at home · 182 km from site</span>
+      </div>
+      <div class="mon-body">
+        <div class="vitals">
+          <div class="vital"><div class="vlabel">Heart rate</div><div class="vval"><span class="vnum" data-vital="hr">72</span><small>bpm</small></div></div>
+          <div class="vital"><div class="vlabel">SpO₂</div><div class="vval"><span class="vnum" data-vital="spo2">98</span><small>%</small></div></div>
+          <div class="vital"><div class="vlabel">Respiration</div><div class="vval"><span class="vnum" data-vital="rr">16</span><small>rpm</small></div></div>
+        </div>
+        <div class="scope">
+          <svg viewBox="0 0 1200 280" preserveAspectRatio="none">
+            <line class="baseline" x1="0" y1="140" x2="1200" y2="140"/>
+            <g class="g">
+              <path class="ecgline" d="M0,140 L40,140 L52,133 L64,140 L86,140 L94,151 L102,104 L110,172 L118,126 L126,140 L165,140 L182,131 L204,140 L400,140 L440,140 L452,133 L464,140 L486,140 L494,151 L502,104 L510,172 L518,126 L526,140 L565,140 L582,131 L604,140 L800,140 L840,140 L852,133 L864,140 L886,140 L894,151 L902,104 L910,172 L918,126 L926,140 L965,140 L982,131 L1004,140 L1200,140"/>
+              <path class="ecgline" transform="translate(1200,0)" d="M0,140 L40,140 L52,133 L64,140 L86,140 L94,151 L102,104 L110,172 L118,126 L126,140 L165,140 L182,131 L204,140 L400,140 L440,140 L452,133 L464,140 L486,140 L494,151 L502,104 L510,172 L518,126 L526,140 L565,140 L582,131 L604,140 L800,140 L840,140 L852,133 L864,140 L886,140 L894,151 L902,104 L910,172 L918,126 L926,140 L965,140 L982,131 L1004,140 L1200,140"/>
+            </g>
+          </svg>
+          <div class="sweep"></div>
+          <div class="event"><span class="evdot"></span><span class="evlabel">AE flagged · photo attached<br>→ investigator · &lt;15 min</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n b" data-count="5">5</div><div class="k">capability pillars</div></div>
+      <div class="stat"><div class="n a">&lt;15<span style="font-size:15px">min</span></div><div class="k">AE alert, when online</div></div>
+      <div class="stat"><div class="n" data-count="2">2</div><div class="k">apps · patient &amp; site</div></div>
+      <div class="stat"><div class="n">BYOD</div><div class="k">patients' own phones</div></div>
+      <div class="stat"><div class="n b">~4–5<span style="font-size:15px">mo</span></div><div class="k">to pilot sign-off</div></div>
+    </div>
+
+    <div class="meta">
+      <span>Prepared for <b>Mr. Aqeel Bharawala</b></span>
+      <span>By <b>Mohammed · Solution Architecture</b></span>
+      <span><b>Confidential</b> — draft for review</span>
+    </div>
+  </div>
+</header>
+
+<!-- 01 UNDERSTANDING -->
+<section class="section" id="understanding">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">01</span> Understanding the brief</div>
+    <h2 class="lede">Recruitment doesn't stop at the catchment boundary. Neither can safety monitoring.</h2>
+    <p class="sub">Patients who qualify for your trial often live too far to attend the centre for every timepoint. The follow-up still has to happen, adverse events still have to be caught early — with a photo the investigator can actually see — and protocol-driven data still has to land on time.</p>
+    <div class="grid g3" style="margin-top:42px">
+      <div class="card"><div class="ci">DISTANCE</div><h3>Follow-up without the journey</h3><p>Distant patients miss visits and drop out. Assessments must reach them where they are, timed to the protocol, not the postcode.</p></div>
+      <div class="card"><div class="ci">SAFETY</div><h3>Adverse events between visits</h3><p>A rash or swelling can appear days before the next contact. The investigator needs to see it quickly, not at the next round.</p></div>
+      <div class="card"><div class="ci">DATA</div><h3>Timepoints that hold</h3><p>Disease-specific and welfare assessments lose value when they slip. Missed-timepoint drift becomes protocol deviation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 THE APPS -->
+<section class="section band" id="apps">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">02</span> What the apps actually do</div>
+    <h2 class="lede">Two apps, one record. A patient app and an investigator console.</h2>
+    <p class="sub" style="margin-bottom:36px">Everything a patient submits flows into a single, review-ready record the site sees in real time. Here's exactly what each side does.</p>
+    <div class="apps">
+      <!-- patient app -->
+      <div class="apppanel">
+        <div class="apphead">
+          <div class="appicon">📱</div>
+          <div><h3>Patient app</h3><div class="who">React Native · iOS &amp; Android · BYOD</div></div>
+        </div>
+        <ul class="feats">
+          <li>See "what happens this week" — upcoming assessments on a friendly timeline</li>
+          <li>Complete protocol-timed assessments and questionnaires</li>
+          <li>Report a symptom and attach a photo of a visible adverse event</li>
+          <li>Works offline — captures now, syncs the moment a signal returns</li>
+          <li>Get reminders, with gentle nudges if a window is about to close</li>
+          <li>Review and sign e-consent; message the study team securely</li>
+        </ul>
+        <div class="phone" aria-hidden="true">
+          <div class="scr">
+            <div class="st"><span>9:41</span><span>RPM</span></div>
+            <div class="title">Report a symptom</div>
+            <div class="photoTile"><span class="cam">📷</span>Add a photo of the area</div>
+            <div class="field">Where on your body? · Left forearm</div>
+            <div class="field small">Saved offline · will send when you're back online</div>
+            <div class="pbtn">Submit to study team</div>
+          </div>
+        </div>
+      </div>
+      <!-- investigator console -->
+      <div class="apppanel">
+        <div class="apphead">
+          <div class="appicon">🩺</div>
+          <div><h3>Investigator console</h3><div class="who">React · web dashboard · for PI, site &amp; CRA</div></div>
+        </div>
+        <ul class="feats">
+          <li>See the whole cohort's status live, with a "needs attention now" queue</li>
+          <li>Open an AE report, view the photo, and read the patient's history</li>
+          <li>Record a decision with an auditable trail; grade the event (CTCAE)</li>
+          <li>Track assessment adherence and catch missed-window deviations</li>
+          <li>Watch trends across timepoints per patient and across the cohort</li>
+          <li>Every chart open and action is logged — append-only audit</li>
+        </ul>
+        <div class="browser" aria-hidden="true">
+          <div class="bbar"><i></i><i></i><i></i><span class="url">console.rpm-trial.uk / review-queue</span></div>
+          <div class="bbody">
+            <div class="qhead"><span class="t">Review queue</span><span class="c">3 need attention</span></div>
+            <div class="qrow hot"><span class="pid">P-0142</span><span class="desc">AE photo · rash<small>forearm · submitted 4 min ago</small></span><span class="chip">&lt;15 min</span></div>
+            <div class="qrow"><span class="pid">P-0119</span><span class="desc">Assessment due<small>QoL · window closes today</small></span><span class="chip">today</span></div>
+            <div class="qrow"><span class="pid">P-0207</span><span class="desc">Symptom report<small>fatigue · awaiting review</small></span><span class="chip">new</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 FLOWS -->
+<section class="section" id="flows">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">03</span> App flows</div>
+    <h2 class="lede">Follow a task end to end — tap to play each flow.</h2>
+    <p class="sub" style="margin-bottom:30px">Three core flows show how a single action travels from the patient's phone to the investigator's decision.</p>
+
+    <div class="ftabs">
+      <button class="ftab active" data-flow="ae">⚑ Report an adverse event</button>
+      <button class="ftab" data-flow="assess">✓ Complete an assessment</button>
+      <button class="ftab" data-flow="consent">✎ Give e-consent</button>
+    </div>
+
+    <!-- AE flow -->
+    <div class="flowpanel show" id="flow-ae">
+      <div class="track">
+        <div class="fill"></div>
+        <div class="fnode"><div class="fdot">👀</div><h4>Notice &amp; open</h4><p>Patient sees a rash and opens the app.</p><div class="surf">Patient app</div></div>
+        <div class="fnode"><div class="fdot">📷</div><h4>Report + photo</h4><p>Guided symptom entry with a photo of the area.</p><div class="surf">Patient app · offline</div></div>
+        <div class="fnode"><div class="fdot">🔒</div><h4>Submit</h4><p>Stored, time-stamped and queued — even with no signal.</p><div class="surf">On device</div></div>
+        <div class="fnode flagnode"><div class="fdot">⚑</div><h4>Sync &amp; flag</h4><p>On reconnect, red-flag routes to the investigator.</p><div class="surf">API · &lt;15 min</div></div>
+        <div class="fnode"><div class="fdot">🩺</div><h4>Review &amp; grade</h4><p>Investigator reviews the photo, decides and grades.</p><div class="surf">Console</div></div>
+      </div>
+    </div>
+
+    <!-- assessment flow -->
+    <div class="flowpanel" id="flow-assess">
+      <div class="track cols4">
+        <div class="fill"></div>
+        <div class="fnode"><div class="fdot">🔔</div><h4>Reminder</h4><p>A nudge arrives at the protocol timepoint.</p><div class="surf">Patient app</div></div>
+        <div class="fnode"><div class="fdot">📝</div><h4>Complete</h4><p>Patient fills the scheduled assessment module.</p><div class="surf">Patient app</div></div>
+        <div class="fnode"><div class="fdot">∑</div><h4>Score &amp; sync</h4><p>Responses scored and synced to the record.</p><div class="surf">API</div></div>
+        <div class="fnode"><div class="fdot">📊</div><h4>Land or alert</h4><p>Lands in the record; a miss alerts the site.</p><div class="surf">Console</div></div>
+      </div>
+    </div>
+
+    <!-- consent flow -->
+    <div class="flowpanel" id="flow-consent">
+      <div class="track cols4">
+        <div class="fill"></div>
+        <div class="fnode"><div class="fdot">🗂</div><h4>Issue version</h4><p>Site issues the current consent version.</p><div class="surf">Console</div></div>
+        <div class="fnode"><div class="fdot">📖</div><h4>Review</h4><p>Patient reads it in plain language.</p><div class="surf">Patient app</div></div>
+        <div class="fnode"><div class="fdot">✎</div><h4>Sign or withdraw</h4><p>Patient signs — and can withdraw anytime.</p><div class="surf">Patient app</div></div>
+        <div class="fnode flagnode"><div class="fdot">🔒</div><h4>Audit &amp; gate</h4><p>Consent state is audited and gates collection.</p><div class="surf">API</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 JOURNEYS -->
+<section class="section band" id="journeys">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">04</span> User journeys</div>
+    <h2 class="lede">The same platform, seen from each person's chair.</h2>
+    <p class="sub" style="margin-bottom:6px">What each role does, and what the app does for them, stage by stage.</p>
+
+    <div class="jtabs">
+      <button class="jtab active" data-j="patient"><span class="av">P</span> Patient</button>
+      <button class="jtab" data-j="inv"><span class="av">I</span> Investigator</button>
+      <button class="jtab" data-j="coord"><span class="av">C</span> Site coordinator</button>
+    </div>
+
+    <!-- patient journey -->
+    <div class="jpanel show" id="j-patient">
+      <div class="lane">
+        <div class="stage"><span class="num">1</span><h4>Onboard</h4><div class="does">Gets an invite, installs the app, signs in with a study code.</div><div class="app"><b>App does</b>Sets up their timeline; no clinic trip needed.</div></div>
+        <div class="stage"><span class="num">2</span><h4>Consent</h4><div class="does">Reads the consent in plain language and signs.</div><div class="app"><b>App does</b>Records consent, version-stamped and revocable.</div></div>
+        <div class="stage"><span class="num">3</span><h4>Daily rhythm</h4><div class="does">Responds to reminders, completes assessments, messages the team.</div><div class="app"><b>App does</b>Times everything to the protocol; works offline.</div></div>
+        <div class="stage"><span class="num">4</span><h4>Reports an AE</h4><div class="does">Notices a rash, reports it with a photo, gets reassurance it's sent.</div><div class="app"><b>App does</b>Routes it to the investigator within 15 minutes.</div></div>
+      </div>
+    </div>
+
+    <!-- investigator journey -->
+    <div class="jpanel" id="j-inv">
+      <div class="lane">
+        <div class="stage"><span class="num">1</span><h4>Open the queue</h4><div class="does">Starts the day on a priority list of what needs attention.</div><div class="app"><b>App does</b>Ranks the cohort by urgency, AEs first.</div></div>
+        <div class="stage"><span class="num">2</span><h4>Review the AE</h4><div class="does">Opens the report, sees the photo and the patient's recent history.</div><div class="app"><b>App does</b>Puts photo, timeline and context on one screen.</div></div>
+        <div class="stage"><span class="num">3</span><h4>Decide &amp; grade</h4><div class="does">Records a clinical decision and grades the event.</div><div class="app"><b>App does</b>Captures the decision trail and CTCAE grade.</div></div>
+        <div class="stage"><span class="num">4</span><h4>Oversee</h4><div class="does">Scans trends across timepoints and the whole cohort.</div><div class="app"><b>App does</b>Surfaces drift and keeps a full audit log.</div></div>
+      </div>
+    </div>
+
+    <!-- coordinator journey -->
+    <div class="jpanel" id="j-coord">
+      <div class="lane">
+        <div class="stage"><span class="num">1</span><h4>Monitor adherence</h4><div class="does">Checks who is on track across the study.</div><div class="app"><b>App does</b>Shows live completion status per patient.</div></div>
+        <div class="stage"><span class="num">2</span><h4>Chase misses</h4><div class="does">Follows up patients about to miss a window.</div><div class="app"><b>App does</b>Alerts before a timepoint lapses into deviation.</div></div>
+        <div class="stage"><span class="num">3</span><h4>Stay in touch</h4><div class="does">Answers questions through secure messaging.</div><div class="app"><b>App does</b>Keeps the thread tied to the patient record.</div></div>
+        <div class="stage"><span class="num">4</span><h4>Flag deviations</h4><div class="does">Escalates a confirmed missed assessment.</div><div class="app"><b>App does</b>Logs the deviation and notifies the right people.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">05</span> Architecture</div>
+    <h2 class="lede">Deliberately simple. One API, one store, on AWS.</h2>
+    <p class="sub" style="margin-bottom:38px">A React Native app and a React dashboard, served by a single Node.js / Express API over MongoDB — in a UK AWS region for residency. An export seam in the data layer makes the future EDC push configuration, not a rebuild.</p>
+    <div class="archflow">
+      <div class="tier two">
+        <div class="node"><div class="nic">📱</div><div><h4>Patient app</h4><div class="nsub">React Native · offline-first</div><div class="nchips"><span class="nchip">assessments</span><span class="nchip">AE photos</span><span class="nchip">local queue</span></div></div></div>
+        <div class="node"><div class="nic">🩺</div><div><h4>Investigator console</h4><div class="nsub">React · live dashboard</div><div class="nchips"><span class="nchip">review queue</span><span class="nchip">audit trail</span></div></div></div>
+      </div>
+      <div class="conn"><div class="line"></div><span class="clab">HTTPS / REST · WebSocket for live alerts</span></div>
+      <div class="tier">
+        <div class="node"><div class="nic">⚙</div><div><h4>API service</h4><div class="nsub">Node.js + Express · single backend</div><div class="nchips"><span class="nchip">auth + RBAC</span><span class="nchip">assessment scoring</span><span class="nchip">red-flag routing</span><span class="nchip">EDC export seam</span></div></div></div>
+      </div>
+      <div class="conn"><div class="line"></div><span class="clab">encrypted at rest · append-only audit</span></div>
+      <div class="tier">
+        <div class="node"><div class="nic">🗄</div><div><h4>MongoDB</h4><div class="nsub">document store · trial data</div><div class="nchips"><span class="nchip">assessments &amp; AE records</span><span class="nchip">audit events</span><span class="nchip">AWS KMS / Secrets Manager</span></div></div></div>
+      </div>
+      <div class="conn dash"><div class="line"></div><span class="clab">UK region · London (eu-west-2)</span></div>
+      <div class="tier">
+        <div class="node future"><div class="nic">⇪</div><div><h4>Future · EDC push</h4><div class="nsub">post-MVP · via export seam</div><div class="nchips"><span class="nchip">API push to sponsor EDC</span><span class="nchip">CDISC ODM / REST</span><span class="nchip">scoped separately</span></div></div></div>
+      </div>
+    </div>
+    <div class="offline">
+      <div class="ci">OFFLINE-FIRST SAFETY CONTRACT</div>
+      <p>With no signal, the app keeps capturing — assessments, symptoms and AE photos are stored locally and queued. When connectivity returns, everything syncs in original timestamp order and red-flag alerts dispatch within the 15-minute window. Distance never silences a patient.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 STACK -->
+<section class="section band" id="stack">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">06</span> The stack</div>
+    <h2 class="lede">Five choices. Nothing to explain away.</h2>
+    <div class="stack" style="margin-top:40px">
+      <div class="scell"><div class="ly">Patient app</div><div class="tech">React Native</div><div class="rz">One codebase for iOS &amp; Android, with an offline store.</div></div>
+      <div class="scell"><div class="ly">Console</div><div class="tech">React</div><div class="rz">TypeScript dashboard for investigators &amp; site.</div></div>
+      <div class="scell"><div class="ly">API</div><div class="tech">Node · Express</div><div class="rz">A single backend serving both clients.</div></div>
+      <div class="scell"><div class="ly">Database</div><div class="tech">MongoDB</div><div class="rz">Flexible document store for evolving trial data.</div></div>
+      <div class="scell cloud"><div class="ly">Cloud</div><div class="tech">AWS</div><div class="rz">UK region for residency; managed hosting &amp; backups.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 COMPLIANCE -->
+<section class="section" id="compliance">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">07</span> Regulatory &amp; compliance</div>
+    <h2 class="lede">A UK trial, scoped honestly. No device pathway by design.</h2>
+    <p class="sub" style="margin-bottom:30px">Geography is the UK, so the frame is MHRA plus UK data-protection law — no EU MDR, no US 21 CFR Part 11. Compliance is a design constraint, not paperwork added at the end.</p>
+
+    <div class="designrule">
+      <div class="dr-ey">The design rule that keeps this off the device pathway</div>
+      <h3>The app routes information. The investigator makes every clinical call.</h3>
+      <p>A patient reports a symptom; the app flags it and sends it to a human. It never interprets severity or grades the event itself — so it stays out of medical-device classification under the UK Medical Devices Regulations 2002. This boundary is held through change control.</p>
+      <div class="ruleflow">
+        <div class="rstep"><b>Patient</b>reports a symptom + photo</div>
+        <span class="rarrow">→</span>
+        <div class="rstep"><b>App</b>flags &amp; routes to a human</div>
+        <span class="rarrow">→</span>
+        <div class="rstep"><b>Investigator</b>grades &amp; decides</div>
+        <span class="rarrow">✕</span>
+        <div class="rstep no"><b>Never</b><span>app decides severity</span></div>
+      </div>
+    </div>
+
+    <div class="posture">
+      <div class="preg"><div><h4>UK GDPR / DPA 2018</h4><p>Special-category health data, with lawful basis, minimisation and consent built into the core.</p></div><span class="badge ok">In scope</span></div>
+      <div class="preg"><div><h4>ICH GCP E6(R2)</h4><p>Data integrity and traceability — append-only audit, documented requirements, change control.</p></div><span class="badge ok">In scope</span></div>
+      <div class="preg"><div><h4>MHRA · UK MDR 2002</h4><p>Avoided by design — the app makes no clinical judgement, so it isn't a medical device.</p></div><span class="badge rule">By design</span></div>
+      <div class="preg"><div><h4>GAMP 5 good practice</h4><p>Risk-based testing and data-integrity expectations, built into each delivery phase.</p></div><span class="badge ok">Applied</span></div>
+      <div class="preg"><div><h4>EU MDR · US 21 CFR Part 11</h4><p>Not in play for a UK-only trial — no EU device route, no US electronic-records rule.</p></div><span class="badge na">N/A</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 DELIVERY -->
+<section class="section band" id="delivery">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">08</span> Delivery &amp; phasing</div>
+    <h2 class="lede">Indicative plan to a pilot you can run on one study.</h2>
+    <div class="road" id="road">
+      <div class="roadfill" id="roadfill"></div>
+      <div class="rphase"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Phase 0<b>Discovery</b></span><span class="wkpill">Weeks 0–2</span></div><p class="rd">Open questions answered, requirements baseline, risk-based test approach, finalised architecture.</p><span class="rx">→ scope <b>signed off</b></span></div></div>
+      <div class="rphase"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Phase 1<b>Foundations</b></span><span class="wkpill">Weeks 2–3</span></div><p class="rd">AWS landing zone (UK region), API + MongoDB, identity, RBAC, audit, CI/CD, data model with export seam.</p><span class="rx">→ secure <b>baseline deployed</b></span></div></div>
+      <div class="rphase"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Phase 2<b>Core MVP</b></span><span class="wkpill">Weeks 7–12</span></div><p class="rd">Patient app — assessments, symptoms, photos, reminders — e-consent module, console, red-flag notify.</p><span class="rx">→ end-to-end <b>in staging</b></span></div></div>
+      <div class="rphase"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Phase 3<b>Pilot hardening</b></span><span class="wkpill">Weeks 12–16</span></div><p class="rd">Offline-sync robustness, messaging, accessibility, security testing, pilot configuration.</p><span class="rx">→ <b>pilot-ready</b> on one study</span></div></div>
+      <div class="rphase"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Phase 4<b>Pilot &amp; iterate</b></span><span class="wkpill">Weeks 17–18</span></div><p class="rd">Live pilot, monitoring, fixes, and sponsor UAT sign-off.</p><span class="rx">→ sponsor <b>UAT passed</b></span></div></div>
+      <div class="rphase future"><span class="rnode"></span><div class="rcard"><div class="rhead"><span class="rt">Future<b>EDC push</b></span><span class="wkpill">Post-MVP</span></div><p class="rd">API push of captured data to the sponsor EDC via the export adapter, scoped as its own phase.</p><span class="rx">→ data <b>flowing to EDC</b></span></div></div>
+    </div>
+    <p class="tlnote">MVP to pilot sign-off: approximately <b>~4–5 months</b>, on the stated assumptions. e-Consent is inside this envelope; the EDC push is separately scoped.</p>
+  </div>
+</section>
+
+<!-- 09 QUESTIONS -->
+<section class="section" id="questions">
+  <div class="wrap reveal">
+    <div class="eyebrow"><span class="idx">09</span> What we need from you</div>
+    <h2 class="lede">The few open items that sharpen the estimate.</h2>
+    <p class="sub" style="margin-bottom:34px">None of these block discovery — but answering them lets us firm up scope, licensing, and the timeline.</p>
+    <div class="qlist">
+      <div class="q">Are the disease-specific and quality-of-life assessments licensed/validated instruments? Can you share the list?</div>
+      <div class="q">BYOD is confirmed — what minimum phone spec and photo-quality floor do AE images need, and how are patients below it handled?</div>
+      <div class="q">Are protocol timepoints fixed per study or per patient arm, and what is the source of truth for the visit schedule?</div>
+      <div class="q">For two-way messaging, who is clinically responsible for monitoring and responding, and within what window?</div>
+      <div class="q">AE photos: what retention period, and must images be de-identified before storage or review?</div>
+      <div class="q">What is the escalation pathway for a red-flag event — who is notified, in what order, with what fallback?</div>
+      <div class="q">Confirm the role list and per-role permissions, and whether AE e-signature is a Must or a Should.</div>
+      <div class="q">Expected patient and concurrent-study volumes — and is a pilot study available early for validation?</div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 ASK -->
+<section class="section band" id="ask">
+  <div class="wrap reveal">
+    <div class="ask">
+      <div class="eyebrow" style="justify-content:center"><span class="idx">10</span> The ask</div>
+      <h2>Let's put a remote monitoring pilot in front of your investigators.</h2>
+      <p>The plan above is buildable now: a UK-hosted, GDPR-by-design platform that follows your patients home and brings adverse events back in minutes. The next step is the Section&nbsp;09 answers and a discovery workshop — then a firm timeline and cost envelope.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#understanding">Walk the proposal again</a>
+        <a class="btn ghost" href="#flows">Replay the app flows</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>RPM / DCT · Remote Patient Monitoring Proposal · v1.0 · 2026</span>
+    <span>Prepared by Mohammed · Solution Architecture · Confidential</span>
+  </div>
+</footer>
+
+<script>
+  /* theme toggle */
+  var root=document.documentElement, tgl=document.getElementById('tgl');
+  function setPressed(){tgl.setAttribute('aria-pressed', root.getAttribute('data-theme')==='light');}
+  setPressed();
+  tgl.addEventListener('click',function(){
+    root.classList.add('switching');
+    var next=root.getAttribute('data-theme')==='light'?'dark':'light';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('rpm-theme',next);}catch(e){}
+    setPressed();
+    setTimeout(function(){root.classList.remove('switching');},450);
+  });
+
+  /* design picker */
+  var gear=document.getElementById('gear'), picker=document.getElementById('picker');
+  gear.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=picker.classList.toggle('open');
+    gear.setAttribute('aria-expanded',open);
+  });
+  document.addEventListener('click',function(e){
+    if(!picker.contains(e.target)&&e.target!==gear)picker.classList.remove('open');
+  });
+  function save(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  /* reflect current selection on load */
+  (function(){
+    var pal=root.getAttribute('data-palette'), fnt=root.getAttribute('data-font');
+    document.querySelectorAll('.sw').forEach(function(s){s.classList.toggle('on',s.dataset.pal===pal);});
+    document.querySelectorAll('.fb').forEach(function(f){f.classList.toggle('on',f.dataset.font===fnt);});
+  })();
+  document.querySelectorAll('.sw').forEach(function(s){
+    s.addEventListener('click',function(){
+      root.classList.add('switching');
+      root.setAttribute('data-palette',s.dataset.pal); save('rpm-palette',s.dataset.pal);
+      document.querySelectorAll('.sw').forEach(function(x){x.classList.remove('on');}); s.classList.add('on');
+      setTimeout(function(){root.classList.remove('switching');},450);
+    });
+  });
+  document.querySelectorAll('.fb').forEach(function(f){
+    f.addEventListener('click',function(){
+      root.setAttribute('data-font',f.dataset.font); save('rpm-font',f.dataset.font);
+      document.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');}); f.classList.add('on');
+    });
+  });
+  var burger=document.getElementById('burger'), mob=document.getElementById('mobnav');
+  burger.addEventListener('click',function(){mob.classList.toggle('open');});
+  mob.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){mob.classList.remove('open');});});
+
+  /* scroll reveal */
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+  /* active section → nav + spine */
+  var links=[].slice.call(document.querySelectorAll('.navlinks a'));
+  var spineLinks=[].slice.call(document.querySelectorAll('.spine a'));
+  function activate(id){
+    links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+id);});
+    spineLinks.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+id);});
+  }
+  var so=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)activate(e.target.id);});},{rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section[id]').forEach(function(s){so.observe(s);});
+
+  /* scroll progress + roadmap rail */
+  var prog=document.getElementById('progress');
+  var road=document.getElementById('road'), roadfill=document.getElementById('roadfill');
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+    if(road&&roadfill){
+      var r=road.getBoundingClientRect(),vh=window.innerHeight,mid=vh*0.62;
+      var p=(mid-r.top)/r.height; p=Math.max(0,Math.min(1,p));
+      roadfill.style.height=(p*100)+'%';
+    }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll); onScroll();
+
+  /* live vitals + count-up (skipped if reduced motion) */
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){
+    var ranges={hr:[70,77],spo2:[96,99],rr:[15,18]};
+    setInterval(function(){
+      document.querySelectorAll('[data-vital]').forEach(function(el){
+        var r=ranges[el.dataset.vital]; if(r)el.textContent=Math.floor(r[0]+Math.random()*(r[1]-r[0]+1));
+      });
+    },1700);
+    document.querySelectorAll('[data-count]').forEach(function(el){
+      var co=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){
+        var to=+el.dataset.count,n=0,step=Math.max(1,Math.round(to/22));
+        var iv=setInterval(function(){n+=step;if(n>=to){n=to;clearInterval(iv);}el.firstChild.nodeValue=n;},34);
+        co.unobserve(el);
+      }});},{threshold:.6}); co.observe(el);
+    });
+  }
+
+  /* flow tabs */
+  document.querySelectorAll('.ftab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      var id='flow-'+tab.dataset.flow;
+      document.querySelectorAll('.flowpanel').forEach(function(p){p.classList.remove('show');});
+      var panel=document.getElementById(id);
+      /* reflow to restart the play animation */
+      void panel.offsetWidth; panel.classList.add('show');
+    });
+  });
+
+  /* journey tabs */
+  document.querySelectorAll('.jtab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.jtab').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      document.querySelectorAll('.jpanel').forEach(function(p){p.classList.remove('show');});
+      document.getElementById('j-'+tab.dataset.j).classList.add('show');
+    });
+  });
+</script>
+</body>
+</html>
